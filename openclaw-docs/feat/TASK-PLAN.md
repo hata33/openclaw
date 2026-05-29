@@ -87,11 +87,11 @@
 - [x] 04-policies.md
 
 ### 10. security — 安全系统
-- [ ] README.md
-- [ ] 01-overview.md
-- [ ] 02-lifecycle.md
-- [ ] 03-capabilities.md
-- [ ] 04-policies.md
+- [x] README.md
+- [x] 01-overview.md
+- [x] 02-lifecycle.md
+- [x] 03-capabilities.md
+- [x] 04-policies.md
 
 ### 11. config — 配置系统
 - [ ] README.md
