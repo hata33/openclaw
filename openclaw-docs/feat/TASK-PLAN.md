@@ -143,19 +143,19 @@
 - [ ] README.md + 01 ~ 04
 
 ### 18. tts — 文本转语音
-- [ ] README.md + 01 ~ 04
+- [x] README.md + 01 ~ 04
 
 ### 19. memory — 记忆系统
-- [ ] README.md + 01 ~ 04
+- [x] README.md + 01 ~ 04
 
 ### 20. cron — 定时任务
 - [ ] README.md + 01 ~ 04
 
 ### 21. web-fetch — 网页抓取
-- [ ] README.md + 01 ~ 04
+- [x] README.md + 01 ~ 04
 
 ### 22. web-search — 网页搜索
-- [ ] README.md + 01 ~ 04
+- [x] README.md + 01 ~ 04
 
 ### 23. media — 媒体处理
 - [ ] README.md + 01 ~ 04
