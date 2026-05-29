@@ -31,11 +31,11 @@
 - [ ] 04-policies.md
 
 ### 2. sessions — 会话管理
-- [ ] README.md
-- [ ] 01-overview.md
-- [ ] 02-lifecycle.md
-- [ ] 03-capabilities.md
-- [ ] 04-policies.md
+- [x] README.md
+- [x] 01-overview.md
+- [x] 02-lifecycle.md
+- [x] 03-capabilities.md
+- [x] 04-policies.md
 
 ### 3. agents — Agent 运行时
 - [ ] README.md
@@ -73,11 +73,11 @@
 - [x] 04-policies.md
 
 ### 8. provider-runtime — Provider 运行时
-- [ ] README.md
-- [ ] 01-overview.md
-- [ ] 02-lifecycle.md
-- [ ] 03-capabilities.md
-- [ ] 04-policies.md
+- [x] README.md
+- [x] 01-overview.md
+- [x] 02-lifecycle.md
+- [x] 03-capabilities.md
+- [x] 04-policies.md
 
 ### 9. tools — 工具系统
 - [x] README.md
