@@ -1,3 +1,18 @@
+/**
+ * @file Provider 索引数据规范化器
+ *
+ * 本文件负责将原始的 Provider 索引 JSON 数据规范化为类型安全的结构。
+ * Provider 索引是一个预编译的数据库，包含所有已知 Provider 的元数据，
+ * 用于在插件未安装时提供模型列表预览和安装引导。
+ *
+ * 规范化过程中会：
+ * 1. 验证索引版本号
+ * 2. 过滤掉原型污染风险的 key（isBlockedObjectKey）
+ * 3. 解析插件安装规范（ClawHub/NPM）
+ * 4. 规范化认证选项（authChoices）
+ * 5. 规范化预览目录（previewCatalog）
+ */
+
 import { parseClawHubPluginSpec } from "../../infra/clawhub-spec.js";
 import { parseRegistryNpmSpec } from "../../infra/npm-registry-spec.js";
 import { isBlockedObjectKey } from "../../infra/prototype-keys.js";
@@ -207,6 +222,14 @@ function normalizeProvider(
   };
 }
 
+/**
+ * 规范化 Provider 索引数据
+ *
+ * 验证版本号，规范化所有提供商数据，按字母顺序排序
+ *
+ * @param value - 原始索引数据
+ * @returns 规范化后的索引，如果版本不匹配或数据无效则返回 undefined
+ */
 export function normalizeOpenClawProviderIndex(value: unknown): OpenClawProviderIndex | undefined {
   if (!isRecord(value) || value.version !== OPENCLAW_PROVIDER_INDEX_VERSION) {
     return undefined;

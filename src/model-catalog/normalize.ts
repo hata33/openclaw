@@ -1,3 +1,22 @@
+/**
+ * @file 模型目录数据规范化（Normalize）模块
+ *
+ * 本文件是模型目录系统中最核心的数据处理模块，负责将各种来源的原始模型数据
+ * （来自 manifest JSON、用户配置文件、Provider API 响应等）规范化为统一的、
+ * 类型安全的数据结构。
+ *
+ * 主要职责：
+ * 1. 类型校验与转换 - 确保所有字段符合预期类型
+ * 2. 默认值填充 - 为缺失字段提供合理默认值（如 input 默认为 ["text"]）
+ * 3. 安全过滤 - 使用 isBlockedObjectKey 防止原型污染攻击
+ * 4. 数据标准化 - 统一大小写、去除空白、过滤无效值
+ *
+ * 关键设计：
+ * - 采用防御性编程，对所有输入进行类型检查
+ * - 使用 "ownedProviders" 集合限制只处理已声明的提供商，防止注入攻击
+ * - 规范化后的行（NormalizedModelCatalogRow）包含 mergeKey，用于后续去重合并
+ */
+
 import {
   MODEL_APIS,
   isModelThinkingFormat,
@@ -447,6 +466,13 @@ function normalizeModelCatalogDiscovery(
   return Object.keys(discovery).length > 0 ? discovery : undefined;
 }
 
+/**
+ * 规范化完整的模型目录数据
+ *
+ * @param value - 原始目录数据（通常是 JSON 解析后的对象）
+ * @param params.ownedProviders - 已声明的提供商 ID 集合，只有在此集合中的提供商才会被处理
+ * @returns 规范化后的 ModelCatalog 对象，如果输入无效则返回 undefined
+ */
 export function normalizeModelCatalog(
   value: unknown,
   params: { ownedProviders: ReadonlySet<string> },
@@ -470,6 +496,14 @@ export function normalizeModelCatalog(
   return Object.keys(catalog).length > 0 ? catalog : undefined;
 }
 
+/**
+ * 规范化单个提供商的模型目录行为标准化行列表
+ *
+ * @param params.provider - 提供商 ID
+ * @param params.providerCatalog - 提供商的原始目录数据
+ * @param params.source - 数据来源标识
+ * @returns 规范化后的 NormalizedModelCatalogRow 列表，按 provider 和 id 排序
+ */
 export function normalizeModelCatalogProviderRows(params: {
   provider: string;
   providerCatalog: ModelCatalogProvider;
@@ -531,6 +565,13 @@ export function normalizeModelCatalogProviderRows(params: {
   return rows.toSorted((a, b) => a.provider.localeCompare(b.provider) || a.id.localeCompare(b.id));
 }
 
+/**
+ * 批量规范化多个提供商的模型目录行
+ *
+ * @param params.providers - 提供商 ID 到目录数据的映射
+ * @param params.source - 数据来源标识
+ * @returns 所有提供商的规范化行列表，按 provider 和 id 排序
+ */
 export function normalizeModelCatalogRows(params: {
   providers: Record<string, ModelCatalogProvider>;
   source: ModelCatalogSource;

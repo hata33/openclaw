@@ -1,3 +1,28 @@
+/**
+ * @file Provider 模型共享模块
+ *
+ * 本文件是 Provider 插件系统的核心共享模块，提供模型相关的重放策略、模板克隆、
+ * 思考模式配置等功能。这些功能被多个 Provider 插件共享使用。
+ *
+ * 主要功能分类：
+ * 1. 重放策略（Replay Policy）- 定义如何处理多轮对话中的历史消息
+ *    - openai-compatible: OpenAI 兼容格式的重放策略
+ *    - anthropic-by-model: 根据 Claude 模型版本选择不同的重放策略
+ *    - google-gemini: Google Gemini 格式的重放策略和历史清理
+ *    - hybrid-anthropic-openai: 混合格式的重放策略
+ *
+ * 2. 思考模式（Thinking Profile）- 管理 Claude 模型的思考级别配置
+ *    - 不同模型支持不同的思考级别（off/minimal/low/medium/high/adaptive/xhigh/max）
+ *    - Opus 4.7 支持最高级别的思考模式
+ *
+ * 3. 模型辅助工具 - 模型前缀匹配、模板克隆等
+ *
+ * 设计决策：
+ * - 重放策略族（Replay Family）将相似 Provider 的重放逻辑归类，减少重复代码
+ * - 思考模式配置与模型 ID 绑定，确保每种模型使用正确的思考级别
+ * - 所有 deprecated 标记表示这些函数不应被第三方插件使用，但保留用于内部兼容
+ */
+
 // Shared model/catalog helpers for provider plugins.
 //
 // Keep provider-owned exports out of this subpath so plugin loaders can import it

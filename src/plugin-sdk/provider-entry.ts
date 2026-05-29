@@ -1,3 +1,38 @@
+/**
+ * @file Provider 单插件入口定义
+ *
+ * 本文件提供了定义单一 Provider 插件的高级封装函数 `defineSingleProviderPluginEntry`。
+ * 这是 Provider 插件开发的主要入口点，简化了常见的 Provider 插件注册流程。
+ *
+ * 主要功能：
+ * 1. 自动构建认证方法（API Key 认证）
+ * 2. 自动构建模型目录（从 API 或配置）
+ * 3. 自动注册到统一模型目录
+ * 4. 支持向导式设置流程
+ * 5. 支持环境变量自动关联
+ *
+ * 使用示例：
+ * ```typescript
+ * defineSingleProviderPluginEntry({
+ *   id: "my-provider",
+ *   name: "My Provider",
+ *   description: "A custom AI provider",
+ *   provider: {
+ *     label: "My Provider",
+ *     docsPath: "/providers/my-provider",
+ *     auth: [{ methodId: "api-key", label: "API Key", envVar: "MY_API_KEY" }],
+ *     catalog: { buildProvider: async () => ({ models: [...] }) },
+ *   },
+ * });
+ * ```
+ *
+ * 设计决策：
+ * - 单一 Provider 插件只需关注自己的配置，框架处理通用逻辑
+ * - 向导设置（wizard）可自定义或完全禁用
+ * - 模型目录支持静态和动态两种构建方式
+ * - 配置中的额外属性会透传到最终的 Provider 注册
+ */
+
 import type { UnifiedModelCatalogEntry } from "../model-catalog/types.js";
 import { createProviderApiKeyAuthMethod } from "../plugins/provider-api-key-auth.js";
 import type {
@@ -150,6 +185,30 @@ async function runUnifiedTextCatalog(params: {
   });
 }
 
+/**
+ * 定义单一 Provider 插件入口
+ *
+ * 这是 Provider 插件开发的主要入口点，封装了常见的 Provider 注册流程。
+ * 自动处理认证方法构建、模型目录构建、向导设置等通用逻辑。
+ *
+ * @param options - 单一 Provider 插件配置选项
+ * @returns 规范化的插件定义对象
+ *
+ * @example
+ * ```typescript
+ * defineSingleProviderPluginEntry({
+ *   id: "openai",
+ *   name: "OpenAI",
+ *   description: "OpenAI API provider",
+ *   provider: {
+ *     label: "OpenAI",
+ *     docsPath: "/providers/openai",
+ *     auth: [{ methodId: "api-key", label: "API Key", envVar: "OPENAI_API_KEY" }],
+ *     catalog: { buildProvider: async () => ({ models: [...] }) },
+ *   },
+ * });
+ * ```
+ */
 export function defineSingleProviderPluginEntry(options: SingleProviderPluginOptions) {
   return definePluginEntry({
     id: options.id,

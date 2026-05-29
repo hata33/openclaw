@@ -1,3 +1,24 @@
+/**
+ * @file Provider 认证核心公共辅助模块
+ *
+ * 本文件是 Provider 认证系统的核心入口，聚合导出了认证流程所需的所有工具函数。
+ * 认证系统负责管理用户与各 AI Provider 之间的身份验证和凭证管理。
+ *
+ * 主要功能分类：
+ * 1. 认证 Profile 管理：创建、更新、列出、删除认证 Profile
+ * 2. API Key 处理：输入验证、格式化、预览显示
+ * 3. OAuth 流程：PKCE 挑战生成、回调服务器、Token 管理
+ * 4. 环境变量解析：从环境变量中读取 Provider API Key
+ * 5. 外部 CLI 集成：读取 Claude CLI、Codex CLI 等的凭证
+ * 6. GitHub Copilot 集成：Copilot Token 交换和管理
+ *
+ * 设计原则：
+ * - 凭证永不以明文形式记录到日志
+ * - 所有密钥输入都经过验证和规范化
+ * - 支持多种密钥存储方式（环境变量、Profile、密钥管理器）
+ * - 通过 Profile 机制支持多账号和多 Provider 切换
+ */
+
 // Public auth/onboarding helpers for provider plugins.
 
 import path from "node:path";

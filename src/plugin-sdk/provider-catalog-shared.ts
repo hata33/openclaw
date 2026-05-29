@@ -1,3 +1,26 @@
+/**
+ * @file Provider 目录共享模块
+ *
+ * 本文件提供 Provider 插件的模型目录构建和查询功能，是连接 Provider 插件与模型目录系统的桥梁。
+ *
+ * 主要功能：
+ * 1. Provider 目录构建 - 从配置或 API 获取 Provider 支持的模型列表
+ * 2. 实时目录缓存 - 带 TTL 的缓存机制，避免频繁的 API 调用
+ * 3. 清单目录模型构建 - 从 manifest JSON 构建模型配置
+ * 4. 流式用量兼容性 - 为支持流式用量统计的 Provider 自动标记
+ * 5. 已配置目录条目读取 - 从用户配置文件中读取自定义模型列表
+ *
+ * 缓存设计：
+ * - 使用 SHA-256 哈希作为缓存键，确保缓存命中准确性
+ * - 默认 TTL 30 秒，在数据新鲜度和性能之间取得平衡
+ * - 缓存失败时自动清除，避免脏数据持久化
+ *
+ * 为什么需要这个模块：
+ * - Provider 的模型列表可能来自配置文件、API 调用或 manifest
+ * - 不同来源的数据需要统一处理和缓存
+ * - 用户配置的模型需要与 Provider 提供的模型合并
+ */
+
 // Shared provider catalog helpers for provider plugins.
 //
 // Keep provider-owned exports out of this subpath so plugin loaders can import it

@@ -1,3 +1,25 @@
+/**
+ * @file Provider Onboard（注册引导）辅助模块
+ *
+ * 本文件是 Provider 插件实现注册引导流程的核心工具集。当用户首次配置一个 AI Provider 时，
+ * 系统需要引导用户完成一系列设置步骤，包括：
+ * 1. 配置 Provider 的 API 端点和认证信息
+ * 2. 设置默认模型和模型别名
+ * 3. 应用配置预设（Preset）
+ * 4. 更新模型允许列表
+ *
+ * 核心概念：
+ * - 预设应用器（Preset Applier）: 将 Provider 的默认配置合并到用户配置中
+ * - 模型别名（Model Alias）: 允许用户使用简短名称引用模型（如 "default" → "openai/gpt-4o"）
+ * - 配置合并策略: 新模型不会覆盖用户已有的手动配置
+ * - 保护机制: 只有用户没有设置主模型时，才会自动设置 Provider 的默认模型
+ *
+ * 设计决策：
+ * - 保持依赖轻量，避免在插件激活时引入重量级运行时依赖
+ * - 所有配置修改都返回新对象（不可变更新模式）
+ * - 模型 ID 规范化在写入配置时进行，确保存储的始终是规范格式
+ */
+
 // Keep provider onboarding helpers dependency-light so bundled provider plugins
 // do not pull heavyweight runtime graphs at activation time.
 

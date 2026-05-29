@@ -1,3 +1,21 @@
+/**
+ * @file Provider 工具 Schema 兼容性处理
+ *
+ * 本文件实现了不同 AI Provider 对工具（Tool/Function Calling）JSON Schema 的兼容性处理。
+ * 不同 Provider 对 JSON Schema 规范的支持程度不同，需要进行相应的转换和裁剪。
+ *
+ * 支持的兼容性族（Provider Tool Compat Family）：
+ * - gemini: Google Gemini 不支持部分 JSON Schema 关键字（如 $schema、exclusiveMaximum 等）
+ * - deepseek: DeepSeek 不支持 anyOf/oneOf，需要展平联合类型
+ * - openai: OpenAI 的 strict 模式要求所有属性必须在 required 中，不能有 additionalProperties
+ *
+ * 设计原则：
+ * - normalizeToolSchemas: 转换 Schema 以符合目标 Provider 的要求
+ * - inspectToolSchemas: 检测 Schema 中的违规项，用于诊断和警告
+ * - 两个函数独立工作：normalize 负责修复，inspect 负责报告
+ * - 通过 buildProviderToolCompatFamilyHooks 工厂函数统一创建
+ */
+
 import type { TSchema } from "typebox";
 import {
   cleanSchemaForGemini,
@@ -12,6 +30,10 @@ import type {
 // Shared provider-tool helpers for plugin-owned schema compatibility rewrites.
 export { cleanSchemaForGemini, GEMINI_UNSUPPORTED_SCHEMA_KEYWORDS };
 
+/**
+ * 递归地从 Schema 中移除不支持的关键字
+ * 只处理 properties/items/anyOf/oneOf/allOf 等嵌套结构，保持数据完整性
+ */
 export function stripUnsupportedSchemaKeywords(
   schema: unknown,
   unsupportedKeywords: ReadonlySet<string>,
@@ -54,6 +76,10 @@ export function stripUnsupportedSchemaKeywords(
   return cleaned;
 }
 
+/**
+ * 递归查找 Schema 中使用了不支持的关键字的位置
+ * 返回包含路径信息的违规列表，用于诊断报告
+ */
 export function findUnsupportedSchemaKeywords(
   schema: unknown,
   path: string,
@@ -96,6 +122,10 @@ export function findUnsupportedSchemaKeywords(
   return violations;
 }
 
+/**
+ * 规范化 Gemini 工具 Schema - 移除 Gemini 不支持的关键字
+ * 使用 cleanSchemaForGemini 进行深度清理
+ */
 export function normalizeGeminiToolSchemas(
   ctx: ProviderNormalizeToolSchemasContext,
 ): AnyAgentTool[] {
@@ -126,6 +156,16 @@ export function inspectGeminiToolSchemas(
   });
 }
 
+/**
+ * 规范化 OpenAI 工具 Schema - 转换为 strict 模式兼容格式
+ * 仅在 OpenAI Responses API 和 OpenAI Codex Responses API 时生效
+ *
+ * strict 模式要求：
+ * - 所有对象必须有 type: "object"
+ * - 所有属性必须在 required 中
+ * - 不能使用 anyOf/oneOf/allOf
+ * - additionalProperties 必须为 false
+ */
 export function normalizeOpenAIToolSchemas(
   ctx: ProviderNormalizeToolSchemasContext,
 ): AnyAgentTool[] {
@@ -394,6 +434,7 @@ export function inspectOpenAIToolSchemas(
   return [];
 }
 
+/** DeepSeek 不支持的 Schema 关键字集合 */
 export const DEEPSEEK_UNSUPPORTED_SCHEMA_KEYWORDS = new Set(["anyOf", "oneOf"]);
 
 function isNullSchemaVariant(schema: unknown): boolean {
@@ -497,6 +538,11 @@ function isStringConstVariant(entry: unknown): entry is { const: string } {
   return typeof record.const === "string";
 }
 
+/**
+ * 规范化 DeepSeek 工具 Schema
+ * 将 anyOf/oneOf 联合类型展平为单个类型
+ * 对于字符串字面量联合，转换为 enum 类型
+ */
 export function normalizeDeepSeekToolSchemas(
   ctx: ProviderNormalizeToolSchemasContext,
 ): AnyAgentTool[] {
@@ -530,8 +576,16 @@ export function inspectDeepSeekToolSchemas(
   });
 }
 
+/** Provider 工具兼容性族类型 */
 export type ProviderToolCompatFamily = "deepseek" | "gemini" | "openai";
 
+/**
+ * 构建指定兼容性族的工具 Schema 处理钩子
+ * 返回 normalizeToolSchemas 和 inspectToolSchemas 两个函数
+ *
+ * @param family - 兼容性族名称
+ * @returns 包含规范化和检测函数的对象
+ */
 export function buildProviderToolCompatFamilyHooks(family: ProviderToolCompatFamily): {
   normalizeToolSchemas: (ctx: ProviderNormalizeToolSchemasContext) => AnyAgentTool[];
   inspectToolSchemas: (ctx: ProviderNormalizeToolSchemasContext) => ProviderToolSchemaDiagnostic[];

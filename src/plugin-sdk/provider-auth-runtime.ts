@@ -1,3 +1,23 @@
+/**
+ * @file Provider 认证运行时公共辅助模块
+ *
+ * 本文件提供 Provider 认证的运行时功能，这些功能在请求执行时使用（而非配置时）。
+ * 主要处理 OAuth 回调服务器和运行时 API Key 解析。
+ *
+ * 主要功能：
+ * 1. OAuth 回调服务器：启动本地 HTTP 服务器接收 OAuth 回调
+ * 2. OAuth 状态管理：生成和验证 OAuth state 参数（防 CSRF）
+ * 3. CORS 处理：为 OAuth 回调提供跨域支持
+ * 4. 运行时 API Key 解析：根据配置和环境变量解析实际的 API Key
+ * 5. 运行时认证解析：为模型请求构建完整的认证上下文
+ *
+ * 安全设计：
+ * - OAuth state 参数使用 crypto.randomBytes 生成，防止猜测
+ * - CORS 白名单机制限制可访问 OAuth 回调的源
+ * - 所有 HTML 输出都经过转义，防止 XSS 攻击
+ * - Token 缓存使用文件系统持久化，支持进程重启后恢复
+ */
+
 // Public runtime auth helpers for provider plugins.
 
 import crypto from "node:crypto";

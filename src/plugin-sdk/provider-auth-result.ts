@@ -1,3 +1,20 @@
+/**
+ * @file Provider OAuth 认证结果构建器
+ *
+ * 本文件提供 OAuth 认证流程完成后的结果构建逻辑。
+ * 当用户通过 OAuth 流程（如 GitHub Copilot、OpenAI Codex）完成认证后，
+ * 系统需要：
+ * 1. 构建标准的认证结果结构（ProviderAuthResult）
+ * 2. 规范化配置中的模型引用
+ * 3. 创建认证 Profile
+ * 4. 应用配置补丁
+ *
+ * 为什么需要规范化模型引用：
+ * - 用户可能输入 "openai/gpt-4o" 或 "GPT-4o" 等不同格式
+ * - 系统需要统一为 "provider/model-id" 格式
+ * - 配置补丁中的模型引用也需要规范化，避免后续查找失败
+ */
+
 import { buildAuthProfileId } from "../agents/auth-profiles/identity.js";
 import type { AuthProfileCredential } from "../agents/auth-profiles/types.js";
 import { normalizeConfiguredProviderCatalogModelId } from "../agents/model-ref-shared.js";

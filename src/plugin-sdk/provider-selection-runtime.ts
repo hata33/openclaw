@@ -1,3 +1,23 @@
+/**
+ * @file Provider 选择运行时
+ *
+ * 本文件实现了 Provider 的自动选择和配置解析逻辑。
+ * 当系统需要使用某个能力（如文本推理）时，可能有多个 Provider 可用，
+ * 本模块负责选择最合适的 Provider。
+ *
+ * 选择策略：
+ * 1. 如果用户明确指定了 Provider（configuredProviderId），优先使用
+ * 2. 如果指定的 Provider 不存在，返回错误
+ * 3. 如果未指定，按 autoSelectOrder 排序选择第一个已配置的 Provider
+ * 4. 如果没有已配置的 Provider，返回错误并建议第一个可用的
+ *
+ * 为什么需要这个模块：
+ * - 不同用户可能使用不同的 Provider（OpenAI、Anthropic、Google 等）
+ * - 系统需要在用户无感的情况下自动选择最佳可用 Provider
+ * - 配置可能分散在多个位置（config 文件、环境变量、Profile）
+ * - 需要统一的配置解析和验证逻辑
+ */
+
 import { normalizeOptionalString } from "../shared/string-coerce.js";
 
 export type AutoSelectableProvider = {

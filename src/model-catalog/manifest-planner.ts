@@ -1,3 +1,18 @@
+/**
+ * @file 模型目录清单规划器（Manifest Planner）
+ *
+ * 本文件实现了从插件清单（manifest）中规划模型目录数据的逻辑。
+ * 当多个插件声明了相同的模型时，系统需要：
+ * 1. 识别冲突（同一 mergeKey 被多个插件声明）
+ * 2. 过滤掉冲突条目（避免不确定行为）
+ * 3. 应用别名覆盖（将模型映射到不同的 API 端点）
+ * 4. 规划抑制规则（在特定条件下隐藏模型）
+ *
+ * 冲突处理策略：
+ * 当两个插件声明了相同的模型（相同 provider + modelId）时，两个条目都会被丢弃。
+ * 这是一个保守策略——宁可不显示模型，也不显示错误的配置。
+ */
+
 import { normalizeLowercaseStringOrEmpty } from "../shared/string-coerce.js";
 import { normalizeUniqueStringEntries } from "../shared/string-normalization.js";
 import { normalizeModelCatalogProviderRows } from "./normalize.js";
@@ -9,6 +24,7 @@ import type {
   NormalizedModelCatalogRow,
 } from "./types.js";
 
+/** 清单中的插件描述，包含该插件声明的模型目录数据 */
 type ManifestModelCatalogPlugin = {
   id: string;
   providers?: readonly string[];
@@ -57,6 +73,16 @@ type ManifestModelCatalogSuppressionPlan = {
   suppressions: readonly ManifestModelCatalogSuppressionEntry[];
 };
 
+/**
+ * 规划所有插件清单中的模型目录行
+ *
+ * 扫描所有已注册插件的 modelCatalog 配置，规范化模型数据，检测冲突，
+ * 并返回最终的无冲突模型列表。
+ *
+ * @param params.registry - 包含所有已注册插件的注册表
+ * @param params.providerFilter - 可选的提供商过滤器，只处理指定提供商的模型
+ * @returns 包含去重后的行、每个条目的来源信息、以及冲突列表的规划结果
+ */
 export function planManifestModelCatalogRows(params: {
   registry: ManifestModelCatalogRegistry;
   providerFilter?: string;
@@ -211,6 +237,17 @@ function applyModelCatalogAliasOverrides(params: {
   }));
 }
 
+/**
+ * 规划所有插件清单中的模型抑制规则
+ *
+ * 抑制规则用于在特定条件下（如特定 baseUrl 或 API 类型）隐藏某些模型。
+ * 例如：某个模型在自托管部署中不兼容，可以在该场景下抑制它。
+ *
+ * @param params.registry - 包含所有已注册插件的注册表
+ * @param params.providerFilter - 可选的提供商过滤器
+ * @param params.modelFilter - 可选的模型 ID 过滤器
+ * @returns 按 provider、model、pluginId 排序的抑制规则列表
+ */
 export function planManifestModelCatalogSuppressions(params: {
   registry: ManifestModelCatalogRegistry;
   providerFilter?: string;

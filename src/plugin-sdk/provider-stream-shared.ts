@@ -1,3 +1,36 @@
+/**
+ * @file Provider 流式处理共享模块
+ *
+ * 本文件是 Provider 插件流式响应处理的核心模块，提供了流式包装器的组合、
+ * 纯文本工具调用检测与提升、以及多种 Provider 特定的流式处理辅助函数。
+ *
+ * 核心功能：
+ * 1. 流式包装器组合（composeProviderStreamWrappers）
+ *    - 将多个流式包装器函数按顺序组合成一个
+ *    - 采用函数式编程的 reduce 模式，实现声明式的流处理管道
+ *
+ * 2. 纯文本工具调用兼容（createPlainTextToolCallCompatWrapper）
+ *    - 处理某些 Provider 在启用原生工具调用时仍输出纯文本格式工具调用的情况
+ *    - 使用缓冲策略延迟输出文本事件，直到确认不是工具调用格式
+ *    - 支持两种格式：[tool:name]{...} 和 Harmony 格式 (<|channel|>...)
+ *
+ * 3. Payload 补丁流式包装器（createPayloadPatchStreamWrapper）
+ *    - 在发送请求前修改 payload，用于注入 Provider 特定的参数
+ *    - 例如：Google 的 thinkingConfig、Anthropic 的 cacheControl 等
+ *
+ * 4. Provider 特定的流式处理辅助函数（已废弃，仅供内部使用）
+ *    - Anthropic: thinking 模式的 prefill 处理
+ *    - DeepSeek: reasoning_effort 和 reasoning_content 处理
+ *    - Google: thinkingConfig 和 thinkingBudget 处理
+ *    - OpenAI: thinking-only 输出提升为文本
+ *
+ * 设计决策：
+ * - 缓冲策略：纯文本工具调用检测使用延迟输出，因为流式传输中文本是逐字符到达的，
+ *   需要累积足够文本才能判断是否为工具调用格式
+ * - couldStillBePlainTextToolCall 函数是性能关键路径，使用前缀匹配而非正则表达式
+ * - 所有 deprecated 函数仅供内部 Provider 插件使用，第三方应使用 buildProviderReplayFamilyHooks
+ */
+
 import { randomUUID } from "node:crypto";
 import type { StreamFn } from "@earendil-works/pi-agent-core";
 import { createAssistantMessageEventStream, streamSimple } from "@earendil-works/pi-ai";
@@ -6,12 +39,23 @@ import { normalizeLowercaseStringOrEmpty } from "../shared/string-coerce.js";
 import type { ProviderWrapStreamFnContext } from "./plugin-entry.js";
 import { parseStandalonePlainTextToolCallBlocks } from "./tool-payload.js";
 
+/** 流式包装器工厂类型 - 可以是包装器函数、null、undefined 或 false（用于条件性包装） */
 export type ProviderStreamWrapperFactory =
   | ((streamFn: StreamFn | undefined) => StreamFn | undefined)
   | null
   | undefined
   | false;
 
+/**
+ * 组合多个流式包装器为一个流处理管道
+ *
+ * 使用 reduce 模式将包装器从左到右依次应用到基础 StreamFn 上。
+ * null/undefined/false 的包装器会被自动跳过，便于条件性启用包装器。
+ *
+ * @param baseStreamFn - 基础流式函数（通常是底层 API 调用）
+ * @param wrappers - 包装器列表，从内到外应用
+ * @returns 组合后的流式函数，如果所有包装器都为空则返回 baseStreamFn
+ */
 export function composeProviderStreamWrappers(
   baseStreamFn: StreamFn | undefined,
   ...wrappers: ProviderStreamWrapperFactory[]
@@ -420,6 +464,21 @@ function wrapPlainTextToolCallStream(
  * Provider stream wrapper for local/proxy providers that sometimes emit a
  * standalone textual tool-call block even when native tool calling is enabled.
  */
+/**
+ * 创建纯文本工具调用兼容包装器
+ *
+ * 处理某些 Provider 在启用原生工具调用时仍输出纯文本格式工具调用的情况。
+ * 使用缓冲策略延迟输出文本事件，直到确认不是工具调用格式。
+ *
+ * 工作原理：
+ * 1. 缓冲所有 text_start/text_delta/text_end 事件
+ * 2. 累积文本内容，检查是否可能是工具调用前缀
+ * 3. 一旦文本不再可能是工具调用格式，刷新缓冲的事件
+ * 4. 在 done 事件时，尝试将纯文本提升为工具调用
+ *
+ * @param baseStreamFn - 基础流式函数
+ * @returns 带有纯文本工具调用检测的流式函数
+ */
 export function createPlainTextToolCallCompatWrapper(baseStreamFn: StreamFn | undefined): StreamFn {
   const underlying = baseStreamFn ?? streamSimple;
   return (model, context, options) => {
@@ -446,6 +505,17 @@ export function defaultToolStreamExtraParams(
   };
 }
 
+/**
+ * 创建 Payload 补丁流式包装器
+ *
+ * 在请求发送前修改 payload，用于注入 Provider 特定的参数。
+ * 例如：Google 的 thinkingConfig、Anthropic 的 cacheControl 等。
+ *
+ * @param baseStreamFn - 基础流式函数
+ * @param patchPayload - 补丁函数，接收 payload 并原地修改
+ * @param wrapperOptions - 可选的条件判断，决定是否应用补丁
+ * @returns 带有 payload 补丁的流式函数
+ */
 export function createPayloadPatchStreamWrapper(
   baseStreamFn: StreamFn | undefined,
   patchPayload: (params: {
