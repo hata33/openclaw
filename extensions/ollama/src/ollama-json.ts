@@ -1,3 +1,22 @@
+/**
+ * Ollama JSON 安全解析器
+ *
+ * 本文件提供特殊的安全 JSON 解析功能，解决 Ollama 返回的大整数精度丢失问题。
+ *
+ * 问题背景：
+ * JavaScript 的 Number 类型使用 IEEE 754 双精度浮点数，
+ * 安全整数范围为 -(2^53 - 1) 到 2^53 - 1。
+ * Ollama 某些模型返回的 JSON 中可能包含超出此范围的整数（如某些 ID 或 hash），
+ * 直接使用 JSON.parse 会导致精度丢失。
+ *
+ * 解决方案：
+ * 1. 在解析前扫描 JSON 字符串，识别不安全的大整数
+ * 2. 将这些整数用双引号包裹，使其成为字符串
+ * 3. 然后执行标准 JSON.parse
+ *
+ * 这样既保留了原始数值的精确表示，又不会破坏 JSON 结构。
+ * 处理后的值以字符串形式存在于解析结果中。
+ */
 const MAX_SAFE_INTEGER_ABS_STR = String(Number.MAX_SAFE_INTEGER);
 
 function isAsciiDigit(ch: string | undefined): boolean {

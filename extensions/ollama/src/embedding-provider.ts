@@ -1,3 +1,21 @@
+/**
+ * Ollama 嵌入向量（Embedding）提供者
+ *
+ * 本文件实现 Ollama 的嵌入向量生成功能，用于内存搜索和文档检索。
+ * 嵌入向量是将文本转换为数值向量的技术，支持语义相似度计算。
+ *
+ * 主要功能：
+ * 1. 创建嵌入向量提供者（createOllamaEmbeddingProvider），支持单条和批量嵌入
+ * 2. 查询指令模板（QUERY_INSTRUCTION_TEMPLATES）：为不同模型优化查询格式
+ *    - qwen3-embedding: 使用 Instruct 格式
+ *    - nomic-embed-text: 使用 search_query 格式
+ *    - mxbai-embed-large: 使用 Represent 格式
+ * 3. 向量归一化处理，确保嵌入向量的数学正确性
+ * 4. SSRF 安全防护，防止服务端请求伪造
+ * 5. 支持远程和本地 Ollama 实例，自动解析 API Key 和 baseUrl
+ *
+ * 默认使用 "nomic-embed-text" 模型，这是 Ollama 上常用的轻量级嵌入模型。
+ */
 import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
 import {
   isKnownEnvApiKeyMarker,

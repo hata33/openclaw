@@ -1,3 +1,24 @@
+/**
+ * Ollama 发现共享模块
+ *
+ * 本文件是 Ollama Provider 发现机制的核心实现，负责：
+ * 1. 判断 Ollama 实例是否为本地（isLocalOllamaBaseUrl）
+ * 2. 判断是否使用合成认证（shouldUseSyntheticOllamaAuth）
+ * 3. 执行完整的模型发现流程（resolveOllamaDiscoveryResult）
+ *
+ * 发现流程的关键设计：
+ * - 区分本地和远程 Ollama 实例，本地不需要真实 API Key
+ * - 支持 Docker 环境下的地址解析（host.docker.internal）
+ * - 使用 getCachedLiveCatalogValue 缓存发现结果，避免重复请求
+ * - 测试环境下跳过发现，防止干扰单元测试
+ *
+ * 地址判断覆盖的本地地址范围：
+ * - localhost, 127.0.0.1, 0.0.0.0, ::1, ::
+ * - Docker 特殊地址：host.docker.internal, docker.orb.internal
+ * - 私有网络：10.x.x.x, 172.16-31.x.x, 192.168.x.x
+ * - 本地链路：fe80::/10, fc00::/7
+ * - .local 域名
+ */
 import { getCachedLiveCatalogValue } from "openclaw/plugin-sdk/provider-catalog-shared";
 import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
 import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";

@@ -1,3 +1,15 @@
+/**
+ * StepFun（阶跃星辰）Provider 入口文件
+ *
+ * 本文件是阶跃星辰提供者插件的注册入口，负责：
+ * 1. 注册两个子提供者：Standard（标准）和 Step Plan（推理计划）
+ * 2. 每个子提供者支持中国区和国际区两个端点
+ * 3. 实现区域推断逻辑（从 baseUrl/profileId/环境变量推断用户区域）
+ * 4. 配置目录发现，支持 paired 排序（两个子提供者成对发现）
+ *
+ * 阶跃星辰使用 OpenAI 兼容的 API 格式，中国区和国际区使用不同的 baseUrl。
+ * Step Plan 是阶跃星辰的推理增强服务，提供更深入的思考能力。
+ */
 import {
   definePluginEntry,
   type OpenClawConfig,

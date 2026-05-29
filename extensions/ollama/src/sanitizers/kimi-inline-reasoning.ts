@@ -1,3 +1,21 @@
+/**
+ * Kimi 内联推理清洗器
+ *
+ * 本文件处理 Moonshot Kimi 模型在 Ollama 云端的特殊输出格式。
+ * Kimi 模型会将推理过程和最终答案以特殊格式混合在可见文本中，
+ * 而不是使用标准的 thinking/reasoning 字段。
+ *
+ * 格式特点：
+ * - 推理内容和答案之间使用 \uFE0F（变体选择器）分隔
+ * - 推理过程在前，答案在后
+ * - 需要等待足够长的前缀才能判断是否包含内联推理
+ *
+ * 处理策略：
+ * 1. 流式阶段：等待足够字符（最多 512 字符）再判断是否有推理边界
+ * 2. 检测到边界后，提取边界后的文本作为最终答案
+ * 3. 如果前缀太短（< 80 字符），认为整个文本都是答案
+ * 4. 最终阶段：始终返回完整文本，避免丢失内容
+ */
 import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
 import type {
   OllamaVisibleContentSanitizer,

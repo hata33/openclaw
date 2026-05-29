@@ -1,3 +1,22 @@
+/**
+ * Ollama 网页搜索提供者
+ *
+ * 本文件实现 Ollama 的网页搜索功能，通过 Ollama 的搜索 API 执行网络搜索。
+ *
+ * 主要功能：
+ * 1. 创建网页搜索工具（createOllamaWebSearchProvider），注册为 OpenClaw 搜索提供者
+ * 2. 执行搜索请求（runOllamaWebSearch），支持多端点回退策略
+ * 3. 搜索前检查前置条件（warnOllamaWebSearchPrereqs）：Ollama 是否可达、是否已登录
+ *
+ * 搜索端点策略：
+ * - 云端 Ollama（ollama.com）：直接调用 /api/web_search
+ * - 本地 Ollama：优先尝试 /api/experimental/web_search（本地代理），
+ *   失败后回退到 /api/web_search，最后尝试云端
+ *
+ * 重要说明：
+ * - Ollama 网页搜索需要运行 `ollama signin` 登录
+ * - 本地代理路径与云端路径不同，需要分别尝试
+ */
 import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
 import {
   isNonSecretApiKeyMarker,

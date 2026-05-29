@@ -1,3 +1,24 @@
+/**
+ * Google Plugin 入口文件
+ *
+ * 本文件是 Google 所有功能的插件注册入口，是功能最丰富的 Provider 插件之一。
+ * 除了基础的文本生成外，还注册了大量多媒体和语音功能。
+ *
+ * 注册的功能模块：
+ * 1. CLI 后端（Gemini CLI）：支持通过命令行直接调用 Gemini
+ * 2. 文本生成提供者：核心的 LLM 推理能力
+ * 3. 内存嵌入提供者：向量搜索和语义检索
+ * 4. 图像生成提供者：文生图、图生图（支持多种尺寸和比例）
+ * 5. 媒体理解提供者：图像/音频/视频理解和转录
+ * 6. 音乐生成提供者：AI 音乐创作
+ * 7. 实时语音提供者：实时语音对话（支持懒加载）
+ * 8. 语音合成提供者：TTS
+ * 9. 视频生成提供者：AI 视频创作
+ * 10. 网页搜索提供者：通过 Gemini 进行网络搜索
+ *
+ * 所有多媒体功能使用懒加载（lazy loading）模式，
+ * 只在首次使用时才加载对应的模块，减少启动时间。
+ */
 import type { ImageGenerationProvider } from "openclaw/plugin-sdk/image-generation";
 import type { MediaUnderstandingProvider } from "openclaw/plugin-sdk/media-understanding";
 import type { MusicGenerationProvider } from "openclaw/plugin-sdk/music-generation";

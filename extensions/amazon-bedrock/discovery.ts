@@ -1,3 +1,27 @@
+/**
+ * Amazon Bedrock 模型发现模块
+ *
+ * 本文件实现 Bedrock 模型的自动发现机制，通过 AWS SDK 列出可用的模型。
+ *
+ * 发现流程：
+ * 1. 调用 ListFoundationModels 获取基础模型列表
+ * 2. 调用 ListInferenceProfiles 获取推理配置文件列表
+ * 3. 推理配置文件继承基础模型的能力（上下文窗口、推理支持等）
+ * 4. 合并去重后返回统一的模型定义列表
+ *
+ * 已知模型上下文窗口：
+ * 由于 Bedrock API 不返回 token 限制信息，本文件维护了一个硬编码的
+ * 已知模型上下文窗口映射表（KNOWN_CONTEXT_WINDOWS），涵盖：
+ * - Anthropic Claude（3.7/4.x 系列）
+ * - Amazon Nova
+ * - Meta Llama 3/4
+ * - NVIDIA Nemotron
+ * - Mistral、DeepSeek、Cohere、AI21、Google Gemma、GLM、Qwen 等
+ *
+ * 缓存策略：
+ * - 使用时间窗口缓存（默认 1 小时），避免频繁调用 AWS API
+ * - 支持 inFlight 去重，防止并发请求重复发现
+ */
 import {
   type BedrockClient,
   type ListFoundationModelsCommandOutput,

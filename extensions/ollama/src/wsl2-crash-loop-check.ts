@@ -1,3 +1,28 @@
+/**
+ * WSL2 崩溃循环风险检测
+ *
+ * 本文件检测在 WSL2（Windows Subsystem for Linux 2）环境下运行 Ollama 的潜在风险。
+ *
+ * 问题背景：
+ * 在 WSL2 中，使用 GPU（CUDA）的 Ollama 服务可能导致系统崩溃循环：
+ * 1. Ollama 加载模型时锁定（pin）主机内存页
+ * 2. Hyper-V 内存回收机制无法回收这些被锁定的页面
+ * 3. Windows 可能终止并重启 WSL2 VM
+ * 4. 由于 ollama.service 设置了 Restart=always，服务自动重启
+ * 5. 重启后再次尝试加载模型，形成崩溃循环
+ *
+ * 检测条件（三者同时满足才触发警告）：
+ * 1. 当前运行在 WSL2 环境中
+ * 2. ollama.service 已启用且配置了 Restart=always
+ * 3. 系统中存在 CUDA 相关文件（/dev/dxg、nvidia-smi 等）
+ *
+ * 这是一个仅警告（advisory）模块，不会阻止 Provider 注册或模型发现。
+ *
+ * 缓解措施：
+ * 1. 禁用自动启动：sudo systemctl disable ollama
+ * 2. 在 Windows .wslconfig 中禁用自动内存回收
+ * 3. 设置 OLLAMA_KEEP_ALIVE=5m 减少模型驻留时间
+ */
 import { execFile } from "node:child_process";
 import { access } from "node:fs/promises";
 import { promisify } from "node:util";

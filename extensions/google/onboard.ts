@@ -1,3 +1,15 @@
+/**
+ * Google Onboard 配置
+ *
+ * 本文件处理 Google Gemini 提供者的初始化配置：
+ * 1. 定义默认模型：google/gemini-3.1-pro-preview
+ * 2. 处理已退役模型的自动迁移（如 gemini-3-pro → gemini-3.1-pro-preview）
+ * 3. 应用默认模型到 Agent 配置
+ *
+ * 已退役模型检测：
+ * 检查配置中是否引用了已退役的 Google 模型，
+ * 如果有，返回 changed: true 标记触发配置更新。
+ */
 import {
   applyAgentDefaultModelPrimary,
   type OpenClawConfig,

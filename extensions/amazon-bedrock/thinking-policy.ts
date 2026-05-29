@@ -1,3 +1,16 @@
+/**
+ * Amazon Bedrock 思考策略配置
+ *
+ * 本文件定义 Bedrock 上 Claude 模型的思考/推理能力配置。
+ *
+ * 支持的模型和级别：
+ * - Claude Opus 4.7: 支持 off/minimal/low/medium/high/xhigh/adaptive/max，默认 off
+ * - Claude 4.6 (Opus/Sonnet): 支持 off/minimal/low/medium/high/adaptive，默认 adaptive
+ * - 其他 Claude: 支持 off/minimal/low/medium/high
+ *
+ * isOpus47BedrockModelRef 用于识别 Opus 4.7 模型，
+ * 该模型需要特殊处理（如省略废弃的 temperature 参数）。
+ */
 import type { ProviderThinkingProfile } from "openclaw/plugin-sdk/plugin-entry";
 
 const BASE_CLAUDE_THINKING_LEVELS = [

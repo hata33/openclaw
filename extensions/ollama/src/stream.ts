@@ -1,3 +1,33 @@
+/**
+ * Ollama 流式处理核心模块
+ *
+ * 本文件是 Ollama Provider 最复杂的模块，实现完整的流式聊天功能：
+ *
+ * 1. 原生 Ollama 流式处理（createOllamaStreamFn）：
+ *    - 通过 /api/chat 端点发送请求
+ *    - 解析 NDJSON 流式响应
+ *    - 支持思考/推理内容的分离和渐进输出
+ *    - 处理工具调用（tool_calls）
+ *    - 检测乱码可见文本并抛出错误
+ *
+ * 2. OpenAI 兼容流式包装器（createConfiguredOllamaCompatStreamWrapper）：
+ *    - 为使用 OpenAI 兼容 API 的 Ollama 模型提供包装
+ *    - 注入 num_ctx 参数优化上下文窗口
+ *    - 处理 Moonshot/Kimi 模型的特殊思考格式
+ *
+ * 3. 消息格式转换（convertToOllamaMessages）：
+ *    - 将 OpenClaw 内部消息格式转换为 Ollama 原生格式
+ *    - 处理文本、图像、工具调用等多种内容类型
+ *
+ * 4. 工具定义转换（extractOllamaTools）：
+ *    - 将 OpenClaw 工具定义转换为 Ollama 工具格式
+ *    - 规范化 JSON Schema，确保 Ollama 正确解析
+ *
+ * 关键设计决策：
+ * - 使用 SSRF 防护进行所有 HTTP 请求
+ * - 可见内容清洗器处理 Kimi 模型的内联推理格式
+ * - 乱码检测防止非语言文本被误认为正常输出
+ */
 import { randomUUID } from "node:crypto";
 import type { StreamFn } from "@earendil-works/pi-agent-core";
 import type {

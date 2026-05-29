@@ -1,6 +1,22 @@
+/**
+ * Google Gemini 嵌入向量提供者
+ *
+ * 本文件实现 Google Gemini 的嵌入向量生成功能，用于内存搜索和文档检索。
+ *
+ * 主要功能：
+ * 1. 创建 Gemini 嵌入提供者（createGeminiEmbeddingProvider）
+ * 2. 支持单条嵌入（embedQuery）和批量嵌入（embedBatch / embedBatchInputs）
+ * 3. 支持多种嵌入模型：text-embedding-004、gemini-embedding-001、gemini-embedding-2-preview
+ * 4. API Key 轮换机制，支持多个 Key 的自动切换
+ * 5. SSRF 安全防护
+ *
+ * Gemini 嵌入 API 特点：
+ * - 使用 /models/{model}:embedContent 端点（单条）
+ * - 使用 /models/{model}:batchEmbedContents 端点（批量）
+ * - 支持 taskType 参数优化嵌入质量（RETRIEVAL_QUERY / RETRIEVAL_DOCUMENT）
+ * - gemini-embedding-2 支持 outputDimensionality 参数控制向量维度
+ */
 import {
-  buildRemoteBaseUrlPolicy,
-  debugEmbeddingsLog,
   sanitizeAndNormalizeEmbedding,
   withRemoteHttpResponse,
   type EmbeddingInput,

@@ -1,3 +1,32 @@
+/**
+ * @fileoverview OpenAI 图片生成 Provider
+ *
+ * 实现 ImageGenerationProvider 接口，封装 OpenAI 的图片生成和编辑 API。
+ * 支持两种 API 路由：
+ *
+ * 1. 标准 OpenAI Images API（api.openai.com/v1/images/）
+ *    - 用于直连 OpenAI 或 Azure OpenAI 场景
+ *    - 支持 generate（纯文本生成）和 edit（图片编辑）两种模式
+ *
+ * 2. Codex Responses API（chatgpt.com/backend-api/codex/responses）
+ *    - 当用户配置了 Codex OAuth 且无显式 OpenAI API Key 时自动使用
+ *    - 通过 Responses API 的工具机制调用图片生成
+ *    - 支持 SSE 流式响应，可获取 revised_prompt 等额外信息
+ *
+ * 支持的模型：
+ * - gpt-image-2（默认）：最新图片生成模型
+ * - gpt-image-1.5：支持透明背景
+ * - gpt-image-1 / gpt-image-1-mini：旧版模型
+ *
+ * 图片编辑模式：
+ * - 最多支持 5 张输入图片
+ * - 使用 multipart/form-data 上传
+ * - 自动推断上传文件名
+ *
+ * 输出格式：png（默认）、jpeg、webp
+ * 输出质量：low、medium、high、auto
+ */
+
 import path from "node:path";
 import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
 import type {

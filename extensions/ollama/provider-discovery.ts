@@ -1,3 +1,15 @@
+/**
+ * Ollama Provider 发现模块
+ *
+ * 本文件实现 Ollama 提供者的独立发现逻辑，
+ * 与 index.ts 中的完整注册不同，这里提供一个更轻量级的发现插件对象，
+ * 用于 Provider 发现阶段获取 Ollama 的模型列表。
+ *
+ * 关键特性：
+ * - 使用 "late" 排序，确保 Ollama 的发现在其他 Provider 之后执行
+ * - 支持合成认证（synthetic auth），本地实例使用 "ollama-local" 占位凭证
+ * - 发现结果通过 resolveOllamaDiscoveryResult 获取，支持缓存
+ */
 import type { ProviderCatalogContext } from "openclaw/plugin-sdk/provider-catalog-shared";
 import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
 import {

@@ -1,3 +1,17 @@
+/**
+ * Google 模型 ID 规范化
+ *
+ * 本文件处理 Google Gemini 模型 ID 的规范化和别名映射。
+ * 由于 Google 频繁更新模型命名，本文件维护了完整的名称映射表。
+ *
+ * 规则：
+ * 1. 移除 "google/" 前缀后进行规范化，再恢复前缀
+ * 2. 旧模型名称映射到新名称（如 gemini-3-pro → gemini-3.1-pro-preview）
+ * 3. 已退役预览版映射到 GA 版本（如 gemini-3.1-flash-lite-preview → gemini-3.1-flash-lite）
+ * 4. normalizeAntigravityModelId 为 Antigravity 协议添加 -low 后缀
+ *
+ * 这种映射确保用户使用旧名称时仍能正常工作，提供平滑的迁移体验。
+ */
 const ANTIGRAVITY_BARE_PRO_IDS = new Set(["gemini-3-pro", "gemini-3.1-pro", "gemini-3-1-pro"]);
 const GOOGLE_PROVIDER_PREFIX = "google/";
 

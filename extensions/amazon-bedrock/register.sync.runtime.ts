@@ -1,3 +1,22 @@
+/**
+ * Amazon Bedrock Provider 注册核心模块
+ *
+ * 本文件是 Bedrock Provider 最复杂的注册实现，负责：
+ * 1. 注册 Bedrock 提供者，使用 bedrock-converse-stream API
+ * 2. AWS 凭证自动刷新（每次请求前刷新共享配置缓存）
+ * 3. Guardrail（护栏）集成，注入内容安全过滤配置
+ * 4. 缓存点注入（cachePoint），为应用推理配置文件优化 Claude prompt caching
+ * 5. Service Tier 支持（flex/priority/default/reserved）
+ * 6. Opus 4.7 特殊处理：省略已废弃的 temperature 参数，max thinking 级别注入 effort
+ * 7. 应用推理配置文件解析（GetInferenceProfile），确定底层模型能力
+ * 8. 上下文溢出错误匹配和失败原因分类
+ * 9. Claude 思考/推理配置文件解析
+ *
+ * 关键设计决策：
+ * - 应用推理配置文件的 ARN 是不透明的，无法直接从 ID 判断模型类型
+ * - 通过 GetInferenceProfile API 解析底层模型，结果缓存避免重复调用
+ * - 当 pi-ai（底层 AI SDK）无法识别模型时，手动注入缓存点
+ */
 import type { StreamFn } from "@earendil-works/pi-agent-core";
 import { streamSimple } from "@earendil-works/pi-ai";
 import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";

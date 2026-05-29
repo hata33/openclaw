@@ -1,3 +1,25 @@
+/**
+ * Ollama 模型发现与定义模块
+ *
+ * 本文件是 Ollama 模型管理的核心，负责：
+ * 1. 从 Ollama 实例获取已安装模型列表（fetchOllamaModels 通过 /api/tags）
+ * 2. 查询模型详细信息（queryOllamaModelShowInfo 通过 /api/show）
+ * 3. 批量丰富模型上下文信息（enrichOllamaModelsWithContext）
+ * 4. 构建模型定义（buildOllamaModelDefinition），包含推理能力、视觉支持等
+ * 5. 构建完整的 Provider 配置（buildOllamaProvider）
+ *
+ * 模型信息查询的关键逻辑：
+ * - 通过 /api/show 获取模型的 model_info，从中提取 context_length
+ * - 同时解析 Modelfile 中的 num_ctx 参数，取两者较大值
+ * - 使用缓存避免重复查询同一模型（最多缓存 256 个条目）
+ * - 批量查询使用 8 并发控制，避免过载 Ollama 实例
+ *
+ * 模型能力检测：
+ * - vision: 模型是否支持图像输入
+ * - thinking: 模型是否支持推理/思考
+ * - tools: 模型是否支持工具调用
+ * - 对于未查询到能力的模型，使用启发式规则判断（如模型名含 r1/reasoning）
+ */
 import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
 import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-onboard";
 import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";

@@ -1,3 +1,14 @@
+/**
+ * 阿里巴巴视频生成提供者
+ *
+ * 本文件实现基于 DashScope 平台的视频生成功能：
+ * 1. 使用万相（Wan）系列模型进行 AI 视频生成
+ * 2. 采用异步任务模式：提交任务 → 轮询结果 → 返回视频
+ * 3. 支持通过配置文件自定义 baseUrl，兼容国际区端点
+ *
+ * DashScope 是阿里巴巴的 AI 服务平台，提供统一的 AIGC API。
+ * 视频生成通过 /api/v1/services/aigc/video-generation/video-synthesis 端点执行。
+ */
 import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
 import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
 import { resolveProviderHttpRequestConfig } from "openclaw/plugin-sdk/provider-http";

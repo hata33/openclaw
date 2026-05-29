@@ -1,3 +1,22 @@
+/**
+ * Google Gemini API 统一导出与工具函数
+ *
+ * 本文件是 Google Provider 的 API 层入口，负责：
+ * 1. 统一导出 Google Gemini 相关的所有公开接口
+ * 2. 提供 HTTP 请求配置解析函数（resolveGoogleGenerativeAiHttpRequestConfig）
+ * 3. 处理 Google API 的 baseUrl 安全验证（仅允许 generativelanguage.googleapis.com）
+ *
+ * 支持两种传输协议：
+ * - google-generative-ai: Google AI Studio 的标准 API
+ * - google-vertex: Google Cloud Vertex AI 的企业级 API
+ *
+ * 导出模块分组：
+ * - 认证：parseGeminiAuth
+ * - 模型：normalizeGoogleModelId, normalizeAntigravityModelId
+ * - 思考/推理：Thinking 相关的包装器和级别解析
+ * - 传输：transport-stream 和 provider-policy
+ * - CLI：gemini-cli-provider
+ */
 import {
   resolveProviderHttpRequestConfig,
   type ProviderRequestTransportOverrides,

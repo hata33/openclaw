@@ -1,3 +1,14 @@
+/**
+ * DeepSeek Provider 策略 API
+ *
+ * 本文件提供 DeepSeek 提供者的策略层面功能，主要职责：
+ * 1. 模型元数据补充（normalizeConfig）：当用户配置的模型缺少 contextWindow、cost、
+ *    maxTokens 等元数据时，从内置目录中补充，但不会覆盖用户已有的显式配置
+ * 2. 推理配置解析（resolveThinkingProfile）：根据模型 ID 返回对应的推理/思考配置
+ *
+ * "策略 API"是 Provider 扩展的标准化接口，用于在配置规范化阶段介入，
+ * 确保模型配置的完整性和正确性。这些函数在配置加载和默认值应用阶段被调用。
+ */
 import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
 import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-types";
 import { DEEPSEEK_MODEL_CATALOG } from "./models.js";

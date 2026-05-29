@@ -1,3 +1,30 @@
+/**
+ * @fileoverview OpenAI 实时语音 Provider
+ *
+ * 实现 RealtimeVoiceProviderPlugin 接口，提供基于 OpenAI Realtime API 的双向语音对话能力。
+ * 这是 OpenClaw 语音通话功能的核心 Provider，支持实时音频流传输和语音交互。
+ *
+ * 架构概述：
+ * - OpenAIRealtimeVoiceBridge：核心桥接类，管理 WebSocket 连接和事件处理
+ * - 支持两种传输方式：
+ *   1. Gateway Relay（WebSocket）：通过 OpenClaw 网关中转音频流
+ *   2. WebRTC：浏览器端直接连接 OpenAI Realtime API
+ *
+ * 关键特性：
+ * - VAD（语音活动检测）：自动检测用户说话的开始和结束
+ * - Barge-in（打断）：用户可以打断 AI 的回复
+ * - 工具调用：支持实时语音场景下的函数调用
+ * - 自动重连：断线后指数退避重连，最多 5 次
+ * - 会话轮转：超过最大时长时自动创建新会话
+ * - Azure 支持：兼容 Azure OpenAI Realtime API
+ * - Codex OAuth：支持通过 Codex OAuth 令牌认证（无需 API Key）
+ *
+ * 认证策略（按优先级）：
+ * 1. 显式配置的 API Key
+ * 2. Codex OAuth 令牌（对于 gpt- 系列模型）
+ * 3. 环境变量 OPENAI_API_KEY
+ */
+
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import {

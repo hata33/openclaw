@@ -1,3 +1,26 @@
+/**
+ * Ollama 设置与配置模块
+ *
+ * 本文件实现 Ollama Provider 的完整设置流程，包括：
+ * 1. 交互式设置（promptAndConfigureOllama）：
+ *    - 选择模式：Cloud+Local / Cloud Only / Local Only
+ *    - 输入 baseUrl（支持 Docker 环境自动检测）
+ *    - 选择模型（支持已发现的模型和建议模型）
+ *    - 云端模式需要输入 API Key
+ * 2. 非交互式设置（configureOllamaNonInteractive）：
+ *    - 用于 CI/CD 或自动化部署场景
+ *    - 支持自定义 baseUrl 和模型 ID
+ *    - 自动拉取未安装的模型
+ * 3. 模型拉取（pullOllamaModel）：
+ *    - 通过 /api/pull 下载模型
+ *    - 实时显示下载进度
+ *    - 支持流式进度追踪和空闲超时检测
+ *
+ * 模型建议策略：
+ * - 本地模式：建议 gemma4
+ * - 云端模式：建议 kimi-k2.5:cloud、minimax-m2.7:cloud、glm-5.1:cloud
+ * - 使用 mergeUniqueModelNames 合并建议和已发现的模型，去除重复
+ */
 import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
 import type {
   OpenClawConfig,

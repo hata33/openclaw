@@ -1,3 +1,28 @@
+/**
+ * @fileoverview OpenAI 视频生成 Provider
+ *
+ * 实现 VideoGenerationProvider 接口，封装 OpenAI Sora API 的视频生成能力。
+ * 支持三种生成模式：
+ *
+ * 1. 文本生成视频（generate）：仅通过文本描述生成视频
+ * 2. 图片生成视频（image-to-video）：以参考图片为起始帧生成视频
+ * 3. 视频编辑（video-to-video）：基于参考视频生成新视频
+ *
+ * 工作流程：
+ * 1. 提交生成请求 → 获取视频任务 ID
+ * 2. 轮询任务状态 → 等待 "completed" 状态
+ * 3. 下载视频文件 → 返回 Buffer 和元数据
+ *
+ * 支持的模型：
+ * - sora-2（默认）
+ * - sora-2-pro
+ *
+ * 视频参数：
+ * - 时长：4、8、12 秒
+ * - 分辨率：720x1280、1280x720、1024x1792、1792x1024
+ * - 支持通过 aspectRatio（9:16、16:9 等）或 resolution（1080P）指定尺寸
+ */
+
 import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
 import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
 import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";

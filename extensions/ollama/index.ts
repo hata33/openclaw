@@ -1,3 +1,24 @@
+/**
+ * Ollama Provider 入口文件
+ *
+ * 本文件是 Ollama 提供者插件的完整注册入口，是所有 Provider 中最复杂的一个，
+ * 因为 Ollama 同时支持本地和云端模型，且需要动态发现运行时可用的模型。
+ *
+ * 主要职责：
+ * 1. 注册 Ollama 提供者，支持多种认证方式（本地无需认证 / 云端需 API Key）
+ * 2. 注册内存嵌入（embedding）和媒体理解（media understanding）子提供者
+ * 3. 注册网页搜索提供者
+ * 4. 实现动态模型发现机制（prepareDynamicModel / resolveDynamicModel）
+ * 5. 处理 WSL2 环境下的崩溃循环风险检测
+ * 6. 配置流式处理包装器，支持 Ollama 原生和 OpenAI 兼容两种传输协议
+ * 7. 实现模型自动拉取（pull）功能，当用户选择未下载的模型时自动下载
+ *
+ * Ollama 的特殊之处：
+ * - 本地实例通常无需认证，使用合成的 "ollama-local" 凭证
+ * - 支持 OpenAI 兼容传输和原生 /api/chat 两种 API 格式
+ * - 模型列表是动态的，取决于用户本地安装了哪些模型
+ * - 云端模型（:cloud 后缀）需要 ollama signin 认证
+ */
 import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
 import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
 import {

@@ -1,3 +1,24 @@
+/**
+ * @fileoverview 核心 OpenAI Provider 实现
+ *
+ * 实现标准 OpenAI API 的 ProviderPlugin，负责：
+ * 1. 模型目录管理：定义 GPT-5.4/5.5 系列模型的规格（上下文窗口、成本、能力）
+ * 2. 动态模型解析：将用户指定的模型 ID 解析为完整的运行时模型配置
+ * 3. 传输协议选择：自动判断使用 Responses API 还是 Completions API
+ * 4. 认证管理：API Key 认证方式的配置和验证
+ * 5. 系统提示贡献：通过 Prompt Overlay 增强 GPT-5 模型的系统提示
+ *
+ * 支持的模型：
+ * - gpt-5.5 / gpt-5.5-pro：最新旗舰模型，支持推理
+ * - gpt-5.4 / gpt-5.4-pro / gpt-5.4-mini / gpt-5.4-nano：5.4 系列
+ * - chat-latest：自动选择最新的稳定模型
+ *
+ * 与 openai-codex-provider.ts 的区别：
+ * - 此 Provider 使用标准 OpenAI API（api.openai.com）
+ * - Codex Provider 使用 Codex 专用 API（chatgpt.com/backend-api/codex）
+ * - 两者共享部分工具函数（通过 shared.ts）
+ */
+
 import {
   type ProviderResolveDynamicModelContext,
   type ProviderRuntimeModel,
@@ -74,21 +95,41 @@ const OPENAI_MODERN_MODEL_IDS = [
   OPENAI_GPT_54_NANO_MODEL_ID,
 ] as const;
 
+/**
+ * 判断是否应使用 OpenAI Responses API 传输协议
+ *
+ * 决策逻辑：
+ * 1. 必须显式配置 api 为 "openai-completions" 才会考虑切换
+ * 2. 对于 OpenAI 官方 Provider，无自定义 baseUrl 或 baseUrl 为官方端点时使用 Responses
+ * 3. 对于第三方 Provider，仅当 baseUrl 为官方端点时才使用 Responses
+ *
+ * Responses API 是 OpenAI 的新一代 API，支持更丰富的功能（如原生工具调用、推理等）。
+ * 但只有官方端点才完整支持，第三方代理可能仅支持旧的 Completions API。
+ */
 function shouldUseOpenAIResponsesTransport(params: {
   provider: string;
   api?: string | null;
   baseUrl?: string;
 }): boolean {
+  // 显式配置为 completions API 时，不强制切换到 responses
   if (params.api !== "openai-completions") {
     return false;
   }
   const isOwnerProvider = normalizeProviderId(params.provider) === PROVIDER_ID;
   if (isOwnerProvider) {
+    // OpenAI 官方 Provider：无自定义 URL 或 URL 为官方端点时使用 Responses
     return !params.baseUrl || isOpenAIApiBaseUrl(params.baseUrl);
   }
+  // 第三方 Provider：仅官方端点使用 Responses
   return typeof params.baseUrl === "string" && isOpenAIApiBaseUrl(params.baseUrl);
 }
 
+/**
+ * 规范化 OpenAI 模型的传输协议
+ *
+ * 当模型的 api 字段为 "openai-completions" 但满足使用 Responses API 的条件时，
+ * 将其升级为 "openai-responses"。这是为了确保模型使用最佳的 API 版本。
+ */
 function normalizeOpenAITransport(model: ProviderRuntimeModel): ProviderRuntimeModel {
   const useResponsesTransport = shouldUseOpenAIResponsesTransport({
     provider: model.provider,
@@ -106,6 +147,25 @@ function normalizeOpenAITransport(model: ProviderRuntimeModel): ProviderRuntimeM
   };
 }
 
+/**
+ * 解析 OpenAI GPT 模型的前向兼容配置
+ *
+ * 处理新模型 ID 的动态解析。当用户指定一个尚未在静态目录中定义的模型 ID 时，
+ * 此函数根据模型 ID 匹配规则，生成对应的运行时模型配置。
+ *
+ * 工作流程：
+ * 1. 将模型 ID 标准化为小写
+ * 2. 根据 ID 匹配已知的模型系列（如 gpt-5.5、gpt-5.4 等）
+ * 3. 尝试从模板模型克隆配置（优先）
+ * 4. 若无模板，使用 normalizeModelCompat 构建默认配置
+ *
+ * 每个模型系列定义了：
+ * - 模板模型 ID 列表：用于从目录中查找可克隆的模板
+ * - 上下文窗口大小
+ * - 最大输出 token 数
+ * - 输入/输出成本（每百万 token 美元价格）
+ * - 是否支持推理模式
+ */
 function resolveOpenAIGptForwardCompatModel(ctx: ProviderResolveDynamicModelContext) {
   const trimmedModelId = ctx.modelId.trim();
   const lower = normalizeLowercaseStringOrEmpty(trimmedModelId);
@@ -206,6 +266,28 @@ function resolveOpenAIGptForwardCompatModel(ctx: ProviderResolveDynamicModelCont
   );
 }
 
+/**
+ * 构建并返回完整的 OpenAI Provider Plugin
+ *
+ * 这是 OpenAI 直连 Provider 的工厂函数，返回的 ProviderPlugin 包含：
+ *
+ * 认证：
+ * - API Key 认证（通过 OPENAI_API_KEY 环境变量或配置文件）
+ *
+ * 模型解析：
+ * - resolveDynamicModel: 动态解析新模型 ID（如 gpt-5.4 系列）
+ * - normalizeResolvedModel: 标准化传输协议（Completions → Responses）
+ * - normalizeTransport: 传输协议规范化
+ *
+ * 能力：
+ * - Responses API 流式响应支持（SSE/WebSocket）
+ * - 上下文溢出错误匹配
+ * - 原生推理输出模式
+ * - 推理等级配置
+ * - 模型目录动态增强
+ *
+ * @returns 完整配置的 OpenAI ProviderPlugin
+ */
 export function buildOpenAIProvider(): ProviderPlugin {
   return {
     id: PROVIDER_ID,

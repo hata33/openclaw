@@ -1,3 +1,19 @@
+/**
+ * Amazon Bedrock 嵌入向量提供者
+ *
+ * 本文件实现 Bedrock 的嵌入向量生成功能，支持多种嵌入模型：
+ * - Amazon Titan（v1/v2）
+ * - Cohere Embed（v3/v4）
+ * - Amazon Nova（多模态嵌入）
+ * - TwelveLabs Marengo
+ *
+ * 特点：
+ * 1. 不同模型族使用不同的请求/响应格式，通过 Family 类型区分
+ * 2. Cohere 模型支持批量嵌入（embedBatch），其他模型逐条调用
+ * 3. 支持 outputDimensionality 参数控制向量维度（Titan v2/Cohere v4）
+ * 4. 自动检测 AWS 凭证，支持环境变量和共享配置文件
+ * 5. 每次调用前刷新 AWS 凭证缓存，支持凭证轮换
+ */
 import {
   debugEmbeddingsLog,
   sanitizeAndNormalizeEmbedding,

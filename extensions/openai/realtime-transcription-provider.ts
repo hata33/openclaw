@@ -1,3 +1,28 @@
+/**
+ * @fileoverview OpenAI 实时转录 Provider
+ *
+ * 实现 RealtimeTranscriptionProviderPlugin 接口，提供基于 OpenAI Realtime API 的
+ * 实时语音转文字能力。与 realtime-voice-provider.ts 不同，此 Provider 专注于
+ * 单向的语音→文字转录，不包含语音合成和对话管理功能。
+ *
+ * 典型应用场景：
+ * - 实时字幕生成
+ * - 语音笔记转录
+ * - 会议记录
+ *
+ * 技术细节：
+ * - 使用 WebSocket 连接到 OpenAI Realtime Transcription API
+ * - 传输格式：G.711 μ-law（8kHz），兼容电话系统
+ * - VAD（语音活动检测）：自动检测语音段落边界
+ * - 支持多语言转录（通过 language 参数指定）
+ * - 支持自定义 prompt 提升特定领域转录准确率
+ *
+ * 认证策略：
+ * 1. 显式配置的 API Key
+ * 2. 环境变量 OPENAI_API_KEY
+ * 3. Codex OAuth（通过 client secret 机制）
+ */
+
 import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
 import {
   isProviderAuthProfileConfigured,

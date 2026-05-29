@@ -1,3 +1,25 @@
+/**
+ * @fileoverview OpenAI Codex Provider 实现
+ *
+ * 实现基于 Codex 运行时的 ProviderPlugin，与标准 OpenAI Provider 的主要区别：
+ * 1. API 端点不同：使用 chatgpt.com/backend-api/codex 而非 api.openai.com
+ * 2. 传输协议：使用 "openai-codex-responses" 专用协议
+ * 3. 认证方式更丰富：支持 OAuth、设备码、API Key（备用）
+ * 4. 上下文窗口：Codex 运行时的默认上下文窗口可能与原生不同
+ * 5. 模型目录：独立维护，包含 Codex 专用模型（如 gpt-5.3-codex）
+ *
+ * 认证流程：
+ * 1. OAuth 登录（首选）：通过 ChatGPT 账号授权
+ * 2. 设备码配对：适合无浏览器的远程环境
+ * 3. API Key 备用：直接使用 OpenAI API Key
+ *
+ * 该 Provider 还支持：
+ * - OAuth 令牌刷新
+ * - 使用量查询
+ * - 图片输入能力恢复（兼容旧版配置）
+ * - 推理等级配置
+ */
+
 import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
 import type {
   ProviderAuthContext,

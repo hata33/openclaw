@@ -1,3 +1,24 @@
+/**
+ * Google Gemini 传输流式处理模块
+ *
+ * 本文件是 Google Provider 最核心的流式处理实现，负责：
+ * 1. 构建 Google Generative AI 和 Vertex AI 的请求参数
+ * 2. 处理 SSE（Server-Sent Events）流式响应
+ * 3. 实现思考/推理内容的分离和渐进输出
+ * 4. 处理工具调用（functionCall）的流式传输
+ * 5. 实现 Gemini 3 的首次响应重试机制
+ * 6. 处理 thoughtSignature 用于多轮对话中的推理上下文保持
+ *
+ * 支持两种传输协议：
+ * - google-generative-ai: AI Studio API（generativelanguage.googleapis.com）
+ * - google-vertex: Vertex AI API（{location}-aiplatform.googleapis.com）
+ *
+ * 关键设计：
+ * - 使用 SSE 解析 Google 的流式响应格式
+ * - 支持 thinking/text 两种内容块的交错输出
+ * - Gemini 3 模型支持 thinkingLevel 参数控制推理深度
+ * - 首次响应超时后自动降级到最小推理级别重试
+ */
 import type { StreamFn } from "@earendil-works/pi-agent-core";
 import {
   calculateCost,

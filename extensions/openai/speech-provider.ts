@@ -1,3 +1,24 @@
+/**
+ * @fileoverview OpenAI 语音合成 Provider（TTS）
+ *
+ * 实现 SpeechProviderPlugin 接口，将文本转换为语音音频。
+ * 封装 OpenAI 的 TTS API，支持多种音频格式和语音音色。
+ *
+ * 功能特性：
+ * - 多模型支持：gpt-4o-mini-tts、tts-1、tts-1-hd
+ * - 多音色支持：alloy、coral、echo、nova 等 14 种音色
+ * - 多输出格式：mp3、opus、wav（根据目标场景自动选择）
+ * - 语音指令：支持通过 instructions 参数控制语音风格
+ * - 电话场景：专用的 PCM 输出格式（24kHz 采样率）
+ * - Groq 兼容：检测 Groq 端点时自动切换为 WAV 格式
+ *
+ * 配置优先级（从高到低）：
+ * 1. 请求级别的 providerOverrides
+ * 2. TTS 配置中的 providerConfig
+ * 3. 环境变量 OPENAI_API_KEY / OPENAI_TTS_BASE_URL
+ * 4. 默认值
+ */
+
 import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
