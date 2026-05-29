@@ -66,11 +66,11 @@
 - [ ] 04-policies.md
 
 ### 7. model-catalog — 模型目录
-- [ ] README.md
-- [ ] 01-overview.md
-- [ ] 02-lifecycle.md
-- [ ] 03-capabilities.md
-- [ ] 04-policies.md
+- [x] README.md
+- [x] 01-overview.md
+- [x] 02-lifecycle.md
+- [x] 03-capabilities.md
+- [x] 04-policies.md
 
 ### 8. provider-runtime — Provider 运行时
 - [ ] README.md
@@ -80,11 +80,11 @@
 - [ ] 04-policies.md
 
 ### 9. tools — 工具系统
-- [ ] README.md
-- [ ] 01-overview.md
-- [ ] 02-lifecycle.md
-- [ ] 03-capabilities.md
-- [ ] 04-policies.md
+- [x] README.md
+- [x] 01-overview.md
+- [x] 02-lifecycle.md
+- [x] 03-capabilities.md
+- [x] 04-policies.md
 
 ### 10. security — 安全系统
 - [ ] README.md
@@ -101,11 +101,11 @@
 - [ ] 04-policies.md
 
 ### 12. routing — 路由系统
-- [ ] README.md
-- [ ] 01-overview.md
-- [ ] 02-lifecycle.md
-- [ ] 03-capabilities.md
-- [ ] 04-policies.md
+- [x] README.md
+- [x] 01-overview.md
+- [x] 02-lifecycle.md
+- [x] 03-capabilities.md
+- [x] 04-policies.md
 
 ### 13. infra — 基础设施
 - [ ] README.md
